@@ -89,7 +89,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 8
+  m_Constraints: 10
   m_CollisionDetection: 0
 --- !u!114 &4765306228910122886
 MonoBehaviour:
@@ -107,7 +107,7 @@ MonoBehaviour:
   PlayerRotation: {x: 0, y: 0, z: 0}
   Speed: 10
   MaxSpeed: 20
-  JumpForce: 25
+  JumpForce: 20
   MoveHorizontal: {x: 0, y: 0, z: 0}
   MoveVertical: {x: 0, y: 0, z: 0}
   Jumped: 0
@@ -124,7 +124,6 @@ GameObject:
   - component: {fileID: 8518104595925870173}
   - component: {fileID: 6363670037276913127}
   - component: {fileID: 165312086488119853}
-  - component: {fileID: 6510207495009528128}
   - component: {fileID: 1720289365}
   m_Layer: 0
   m_Name: LedgeDetection
@@ -194,19 +193,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &6510207495009528128
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6622699381549470361}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: -0.0000076293945, z: -0.0000076293945}
 --- !u!114 &1720289365
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,6 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef5d32d92f94453469cd0aa4c39cc188, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LeftLedge: 1
 --- !u!1001 &4765306227630352302
 PrefabInstance:
   m_ObjectHideFlags: 0
