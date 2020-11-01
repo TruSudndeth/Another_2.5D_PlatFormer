@@ -8,8 +8,11 @@ using UnityEngine.Animations;
 public class Player_ControlAnimation : MonoBehaviour
 {
     [SerializeField]
+    private Player_Controller PlayerController;
+    [SerializeField]
     public Vector3 ModelPosition;
     private bool Climb = false;
+    [SerializeField]
     private float LandingPower = 0;
     private bool reverseBool = false;
     private bool PlayLandAnimation;
@@ -48,7 +51,7 @@ public class Player_ControlAnimation : MonoBehaviour
                 Jump = false;
                 _fallingInc = -1;
             }
-            Anim.SetFloat("Vertical", _fallingInc);
+            if(!PlayLandAnimation)Anim.SetFloat("Vertical", _fallingInc);
         }
 
         if(PlayLandAnimation)
@@ -63,6 +66,8 @@ public class Player_ControlAnimation : MonoBehaviour
                 ClipLandingAnim -= Time.deltaTime;
                 if (ClipLandingAnim <= 0)
                 {
+                    PlayerController.AllowMoveHorizontal();
+                    ClipLandingAnim = 0;
                     reverseBool = false;
                     PlayLandAnimation = false;
                     Anim.SetBool("Landing", false);
@@ -80,6 +85,7 @@ public class Player_ControlAnimation : MonoBehaviour
         if (_PlayerInput.y == -1) _fallingInc = 0;
         if (_PlayerInput.y == 0)
         {
+            Jump = false;
             _fallingInc = 0;
             Anim.SetFloat("Vertical", 0);
         }
@@ -107,7 +113,6 @@ public class Player_ControlAnimation : MonoBehaviour
         AnimationClip[] FindByName = Anim.runtimeAnimatorController.animationClips;
         foreach(AnimationClip AClip in FindByName)
         {
-            Debug.Log(AClip.name);
             if(AClip.name == "Landing")
             {
                 return AClip;

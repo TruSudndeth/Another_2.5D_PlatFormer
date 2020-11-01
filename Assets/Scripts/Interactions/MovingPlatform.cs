@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if(other.tag == "Player")
@@ -30,6 +24,7 @@ public class MovingPlatform : MonoBehaviour
             if (PlayerController != null)
             {
                 PlayerController.MovingPlatform = null;
+                PlayerController.Jumped = false;
             }
         }
     }

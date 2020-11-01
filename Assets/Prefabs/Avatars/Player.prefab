@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 820ee9b5ac47c09479ffc6e680bd4d04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerController: {fileID: 4765306228910122886}
   ModelPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &4765306228910122884
 GameObject:
@@ -105,9 +106,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MovingPlatform: {fileID: 0}
   OffSet_Y: -0.4
+  GrabSpeed: 0
+  LedgeStandUpPosition: {x: 0, y: 0, z: 0}
   Speed: 10
   MaxSpeed: 20
   JumpForce: 20
+  Jumped: 0
 --- !u!1 &6622699381549470361
 GameObject:
   m_ObjectHideFlags: 0
@@ -272,6 +276,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3082419940410068930, guid: 668a95f9d867e42c1b9239c2270b55e3,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.18
+      objectReference: {fileID: 0}
+    - target: {fileID: -3082419940410068930, guid: 668a95f9d867e42c1b9239c2270b55e3,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -7.75
       objectReference: {fileID: 0}
     - target: {fileID: -927199367670048503, guid: 668a95f9d867e42c1b9239c2270b55e3,
         type: 3}

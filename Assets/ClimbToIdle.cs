@@ -25,7 +25,7 @@ public class ClimbToIdle : StateMachineBehaviour
             Player_Controller PlayerControls = animator.gameObject.transform.parent.GetComponent<Player_Controller>();
             if (PlayerControls != null)
             {
-                PlayerControls.ResetAllControls();
+                PlayerControls.ClimbSequence();
             }
             else Debug.Log("PlayerControlls was null");
         }
