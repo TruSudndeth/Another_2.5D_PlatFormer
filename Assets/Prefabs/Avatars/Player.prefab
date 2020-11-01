@@ -28,7 +28,7 @@ GameObject:
   - component: {fileID: 4765306228910122886}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -103,16 +103,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c5afc44b14ef44ea96a23b1db07597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ArmsReachPosition: {x: 0, y: 0, z: 0}
-  PlayerRotation: {x: 0, y: 0, z: 0}
+  MovingPlatform: {fileID: 0}
+  OffSet_Y: -0.4
   Speed: 10
   MaxSpeed: 20
   JumpForce: 20
-  MoveHorizontal: {x: 0, y: 0, z: 0}
-  MoveVertical: {x: 0, y: 0, z: 0}
-  Jumped: 0
-  Jumped_FixedUpdate: 0
-  LookAtVector: {x: 0, y: 0, z: 0}
 --- !u!1 &6622699381549470361
 GameObject:
   m_ObjectHideFlags: 0

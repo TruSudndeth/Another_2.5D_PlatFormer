@@ -5,19 +5,23 @@ using UnityEngine;
 public class Player_Controller : MonoBehaviour
 {
     //ToDo's
+    // Player can't climb while a shild of elevator
     // Fix PreClimb don't allow jump while animation wall hang idle isn't done.
     // On landing choose to roll forwards or dissable input till landing animation is over.
     // on moving Backwards jump landing automaticly rolls backwards. with an option to back power flip.
+    [HideInInspector]
+    public Transform MovingPlatform;
+    private Vector3 _MovingPlatform;
+    [SerializeField]
+    private float OffSet_Y;
     private float GrabSpeed;
     private Vector3 LedgeStandUpPosition;
     private bool Climbing = false;
     private bool OnLedge = false;
     private Player_LedgeGrab LedgeDetection_Offset;
     private bool IsOnLedge = false;
-    [SerializeField]
     private Vector3 ArmsReachPosition;
     private LedgeGrab _GrabableLedge;
-    [SerializeField]
     private Vector3 PlayerRotation;
     private int InverseDirection = 1;
     private float LandingDamage = 0;
@@ -31,18 +35,18 @@ public class Player_Controller : MonoBehaviour
     private float JumpForce;
     private float gravity = 9.8f;
     private float HangeTime = 0.05f;
-    [SerializeField]
     private Vector3 MoveHorizontal = Vector3.zero;
-    [SerializeField]
     private Vector3 MoveVertical = Vector3.zero;
-    [SerializeField]
     private bool Jumped = false;
-    [SerializeField]
     private bool Jumped_FixedUpdate = false;
     private bool SuperLanding = false;
-    [SerializeField]
-    private Vector3 LookAtVector;
     private IEnumerator _Climbed;
+    private bool GravityT = true;
+    private bool Grounded = false;
+    private bool LandPosition = false;
+    private float PlayerPlatformOffset = 0;
+    private bool ZeroGravityOnLanding_thisFrame = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -58,9 +62,30 @@ public class Player_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(!IsOnLedge)MoveHorizontal.z = Input.GetAxis("Horizontal");
+        if(MovingPlatform == null && !IsOnLedge)
+        {
+            if(LandPosition)LandPosition = false;
+            Grounded = false;
+            if (_MovingPlatform != Vector3.zero)_MovingPlatform = Vector3.zero;
+            MoveHorizontal.z = Input.GetAxis("Horizontal");
+        }
+        if(MovingPlatform != null && !IsOnLedge)
+        {
+            Grounded = true;
+            if(!LandPosition)
+                {
+                    LandPosition = true;
+                    PlayerPlatformOffset = (transform.position.z - MovingPlatform.position.z) * 2;
+                }
+            if(Input.GetAxis("Horizontal") != 0)
+            {
+                
+                MoveHorizontal.z += Input.GetAxis("Horizontal");
+            }
+            _MovingPlatform = MovingPlatform.position - new Vector3(transform.position.x, transform.position.y + OffSet_Y, transform.position.z + PlayerPlatformOffset);
+        }
         if(Input.GetKeyDown(KeyCode.Space) && !Jumped && !Jumped_FixedUpdate) Jumped = true;
-        if(MoveHorizontal.z != 0 && (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)))
+        if(Input.GetAxis("Horizontal") != 0 && (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)))
         {
                 if (MoveHorizontal.z > 0)
                 {
@@ -78,10 +103,12 @@ public class Player_Controller : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(PlayerController.isGrounded)
+        if(PlayerController.isGrounded || Grounded)
         {
             if(SuperLanding)
             {
+                MoveVertical = Vector3.zero;
+                ZeroGravityOnLanding_thisFrame = true;
                 LandingDamage = Mathf.Abs(MoveVertical.y / 300);
                 SuperLanding = false;
                 TriggerAnim.CharactorAnimaition_Landing(LandingDamage);
@@ -90,6 +117,10 @@ public class Player_Controller : MonoBehaviour
             if(Jumped_FixedUpdate)Jumped_FixedUpdate = false;
             if(Jumped && !Jumped_FixedUpdate)
             {
+                LandPosition = false;
+                MovingPlatform = null;
+                Grounded = false;
+                GravityT = true;
                 SuperLanding = true;
                 TriggerAnim.CharactorAnimations_Jump();
                 Jumped_FixedUpdate = true;
@@ -97,7 +128,11 @@ public class Player_Controller : MonoBehaviour
                 MoveVertical.y = 0;
                 MoveVertical.y = JumpForce;
             }
-            if(PlayerController.isGrounded && !Jumped_FixedUpdate && !IsOnLedge) MoveVertical.y = -1;
+            if (PlayerController.isGrounded && !Jumped_FixedUpdate && !IsOnLedge && !Grounded && !ZeroGravityOnLanding_thisFrame)
+            {
+                ZeroGravityOnLanding_thisFrame = false;
+                MoveVertical.y = -1;
+            }
         }
         else
         {
@@ -109,43 +144,16 @@ public class Player_Controller : MonoBehaviour
             {
                 gravity = 9.8f;
             }
-            if(MoveVertical.y > -300 && !IsOnLedge) MoveVertical.y -= gravity;
+            if(MoveVertical.y > -300 && !IsOnLedge && GravityT && !Grounded) MoveVertical.y -= gravity;
         }
         if (!IsOnLedge)
         {
             transform.rotation = Quaternion.Euler(PlayerRotation);
-            PlayerController.Move((MoveVertical + (MoveHorizontal * Mathf.Lerp(Speed, MaxSpeed, MoveHorizontal.z * InverseDirection))) * Time.fixedDeltaTime);
+            if (Grounded) MoveVertical.y = 0;
+            PlayerController.Move(_MovingPlatform + (MoveVertical + (MoveHorizontal * Mathf.Lerp(Speed, MaxSpeed, MoveHorizontal.z * InverseDirection))) * Time.fixedDeltaTime);
         }
-            TriggerAnim.CharacterAnimations((MoveVertical + MoveHorizontal * InverseDirection));
-        if (IsOnLedge)
-        {
-            if (Jumped)
-            {
-                Jumped = false;
-                Climbing = true;
-                TriggerAnim.ClimbLedge(true);
-            }
-            if (Climbing)
-            {
-                if (!OnLedge)
-                {
-                    Vector3 _ModelPosition = TriggerAnim.ModelPosition;
-                    _ModelPosition.z *= InverseDirection;
-                    transform.position += _ModelPosition;
-                }
-                else
-                {
-                    transform.position = Vector3.MoveTowards(transform.position, LedgeStandUpPosition, Time.fixedDeltaTime * 4.535f);
-                    if (transform.position == LedgeStandUpPosition)
-                    {
-                        OnLedge = false;
-                        Climbing = false;
-                        IsOnLedge = false;
-                    }
-                }
-            }
-            else transform.position = Vector3.MoveTowards(transform.position, ArmsReachPosition, Time.fixedDeltaTime * GrabSpeed);
-        }
+        TriggerAnim.CharacterAnimations((MoveVertical + MoveHorizontal.normalized * InverseDirection));
+        ClifHanger();
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -177,6 +185,47 @@ public class Player_Controller : MonoBehaviour
         
     }
 
+    private void ClifHanger()
+    {
+        if (IsOnLedge)
+        {
+            if (Jumped)
+            {
+                Jumped = false;
+                Climbing = true;
+                TriggerAnim.ClimbLedge(true);
+            }
+            if (Climbing)
+            {
+                if (!OnLedge)
+                {
+                    Vector3 _ModelPosition = TriggerAnim.ModelPosition;
+                    _ModelPosition.z *= InverseDirection;
+                    transform.position += _ModelPosition;
+                }
+                else
+                {
+                    transform.position = Vector3.MoveTowards(transform.position, LedgeStandUpPosition, Time.fixedDeltaTime * 4.535f);
+                    if (transform.position == LedgeStandUpPosition)
+                    {
+                        OnLedge = false;
+                        Climbing = false;
+                        IsOnLedge = false;
+                    }
+                }
+            }
+            else transform.position = Vector3.MoveTowards(transform.position, ArmsReachPosition, Time.fixedDeltaTime * GrabSpeed);
+        }
+    }
+
+    public void ToggleGravity(bool _SetGravity)
+    {
+        GravityT = _SetGravity;
+        if (!GravityT)
+        {
+            MoveVertical = Vector3.zero;
+        }
+    }
     public void ResetAllControls()
     {
         

@@ -78,7 +78,12 @@ public class Player_ControlAnimation : MonoBehaviour
             if (_fallingInc == 0) Jump = true;
         }
         if (_PlayerInput.y == -1) _fallingInc = 0;
-        Anim.SetFloat("Vertical", _fallingInc);
+        if (_PlayerInput.y == 0)
+        {
+            _fallingInc = 0;
+            Anim.SetFloat("Vertical", 0);
+        }
+        else Anim.SetFloat("Vertical", _fallingInc);
         SpeedMultiplyer = Mathf.Lerp( 1, 2,_PlayerInput.z);
         Anim.SetFloat("Speed", SpeedMultiplyer);
         Anim.SetFloat("Horizontal", _PlayerInput.z);

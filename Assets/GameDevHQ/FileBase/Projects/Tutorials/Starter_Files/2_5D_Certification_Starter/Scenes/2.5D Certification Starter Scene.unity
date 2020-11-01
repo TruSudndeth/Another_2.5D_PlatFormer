@@ -940,6 +940,37 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 560822163}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &584041898 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1263032819599252056, guid: 002b7009da03aee408601dceed0bd953,
+    type: 3}
+  m_PrefabInstance: {fileID: 8578509356545642422}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &584041903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 584041898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a058545fd826deb4da0bebb534bd1b99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!65 &584041904
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 584041898}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 3.18, y: -1.46, z: 8.73}
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1001 &611794483
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4267,6 +4298,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1664308354532235152, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 1664308354532235152, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -7.75
+      objectReference: {fileID: 0}
     - target: {fileID: 4765306228910122882, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -4275,12 +4316,12 @@ PrefabInstance:
     - target: {fileID: 4765306228910122882, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 11.33
+      value: 89.72
       objectReference: {fileID: 0}
     - target: {fileID: 4765306228910122882, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 157.6
+      value: 176.99
       objectReference: {fileID: 0}
     - target: {fileID: 4765306228910122882, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
         type: 3}
@@ -4555,6 +4596,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1299898985}
     m_Modifications:
+    - target: {fileID: 1263032819599252056, guid: 002b7009da03aee408601dceed0bd953,
+        type: 3}
+      propertyPath: m_Name
+      value: BoxCollider_Trigger_Platform
+      objectReference: {fileID: 0}
     - target: {fileID: 7232492773714691693, guid: 002b7009da03aee408601dceed0bd953,
         type: 3}
       propertyPath: m_LocalPosition.x
