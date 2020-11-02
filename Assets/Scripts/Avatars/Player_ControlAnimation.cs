@@ -39,6 +39,7 @@ public class Player_ControlAnimation : MonoBehaviour
         if(Climb)
         {
             ModelPosition = transform.localPosition * 3;
+            ModelPosition.x = 0;
             transform.localPosition = Vector3.zero;
         }
 
