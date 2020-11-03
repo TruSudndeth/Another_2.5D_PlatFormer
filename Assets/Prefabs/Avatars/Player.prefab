@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerController: {fileID: 4765306228910122886}
   ModelPosition: {x: 0, y: 0, z: 0}
+  LandingPower: 0
 --- !u!1 &4765306228910122884
 GameObject:
   m_ObjectHideFlags: 0
@@ -105,13 +106,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MovingPlatform: {fileID: 0}
+  LedgePlatformPosition: {fileID: 0}
   OffSet_Y: -0.4
   GrabSpeed: 0
   LedgeStandUpPosition: {x: 0, y: 0, z: 0}
+  ArmsReachPosition: {x: 0, y: 0, z: 0}
   Speed: 10
   MaxSpeed: 20
   JumpForce: 20
   Jumped: 0
+  _AllowMoveHorizontal: 1
 --- !u!1 &6622699381549470361
 GameObject:
   m_ObjectHideFlags: 0
