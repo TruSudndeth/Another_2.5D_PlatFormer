@@ -57,7 +57,14 @@ public class Player_Controller : MonoBehaviour
     private bool ZeroGravityOnLanding_thisFrame = false;
     [SerializeField]
     private bool _AllowMoveHorizontal = true;
+    [SerializeField]
     private Vector3 _LedgePlatformPosition;
+    private Vector3 CurrentPosition;
+    private Vector3 _ArmsReach;
+    [SerializeField]
+    private Vector3 TestingFloat;
+    private float LedgeGrabAnimationSpeedInc;
+    private Vector3 ClimbAnimationPosition;
 
     // Start is called before the first frame update
     void Start()
@@ -76,12 +83,10 @@ public class Player_Controller : MonoBehaviour
         {
             Vector3 _LedgeOffset = _GrabableLedge.ReverseLedgeGrab(InverseDirection);
             Vector3 _LedgeDetection_Offset = LedgeDetection_Offset.ReverseLedgeGrab(InverseDirection);
-            _LedgePlatformPosition = _LedgeOffset - _LedgeDetection_Offset;
+
+            _LedgePlatformPosition = _LedgeOffset + (transform.position - _LedgeDetection_Offset);
+            _LedgePlatformPosition.x = 0;
         }
-        else
-        {
-            _LedgePlatformPosition = Vector3.zero;
-         }
         if(Input.GetAxisRaw("Vertical") < 0 && IsOnLedge)
         {
             ResetAllControls();
@@ -176,11 +181,12 @@ public class Player_Controller : MonoBehaviour
         if (!IsOnLedge && _AllowMoveHorizontal)
         {
             transform.rotation = Quaternion.Euler(PlayerRotation);
-            if (Grounded) MoveVertical.y = 0;
+            if (Grounded) 
+                MoveVertical.y = 0;
             PlayerController.Move(_MovingPlatform + (MoveVertical + (MoveHorizontal * SpeedWMultiplier(MoveHorizontal.z))) * Time.fixedDeltaTime);
         }
         Vector3 HorizontalAnimation = new Vector3(0, 0 , Input.GetAxis("Horizontal"));
-        if(!IsOnLedge)TriggerAnim.CharacterAnimations((MoveVertical + HorizontalAnimation * InverseDirection));
+        if (!IsOnLedge)TriggerAnim.CharacterAnimations((MoveVertical + HorizontalAnimation * InverseDirection));
         ClifHanger();
     }
 
@@ -192,16 +198,16 @@ public class Player_Controller : MonoBehaviour
             _GrabableLedge = hit.gameObject.GetComponent<LedgeGrab>();
             if(_GrabableLedge != null)
             {
-                Debug.Break();
-                  LedgePlatformPosition = hit.gameObject.transform;
+                ClimbAnimationPosition = new Vector3();
+                LedgePlatformPosition = hit.gameObject.transform;
                 IsOnLedge = true;
                 _AllowMoveHorizontal = false;
                 Vector3 _LedgeOffset = _GrabableLedge.ReverseLedgeGrab(InverseDirection);
                 Vector3 _LedgeDetection_Offset = LedgeDetection_Offset.ReverseLedgeGrab(InverseDirection);
-                ArmsReachPosition = _LedgeOffset + (transform.position - _LedgeDetection_Offset);
-                GrabSpeed = Vector3.Distance(LedgeDetection_Offset.transform.position, ArmsReachPosition);
-                float DistanceDelta = Mathf.Clamp((GrabSpeed - 8.81437f) / 4.11763f, 0, 1);
-                GrabSpeed *= Mathf.Lerp(1, 1.917f, DistanceDelta);
+                 ArmsReachPosition = _LedgeOffset - _LedgeDetection_Offset;
+                _LedgePlatformPosition = _LedgeOffset + (transform.position - _LedgeDetection_Offset);
+                _LedgePlatformPosition.x = 0;
+                CalculateAnimationGrabSpeed();
                 TriggerAnim.LedgeGrab(true);
                 Jumped_FixedUpdate = false;
                 MoveVertical = Vector3.zero;
@@ -212,6 +218,13 @@ public class Player_Controller : MonoBehaviour
             }
         }
         
+    }
+
+    private void CalculateAnimationGrabSpeed()
+    {
+        GrabSpeed = Vector3.Distance(LedgeDetection_Offset.transform.position, transform.position + ArmsReachPosition);
+        float DistanceDelta = Mathf.Clamp((GrabSpeed - 7.52f) / 4.11763f, 0, 1);
+        GrabSpeed *= Mathf.Lerp(0.4916f, 1.93f, DistanceDelta);
     }
 
     private void ClifHanger()
@@ -226,16 +239,19 @@ public class Player_Controller : MonoBehaviour
             }
             if (Climbing)
             {
-                if (!OnLedge)
+                if (!OnLedge)  //Climbing Animation
                 {
                     Vector3 _ModelPosition = TriggerAnim.ModelPosition;
                     _ModelPosition.z *= InverseDirection;
-                    transform.position = MovingPlatformOffset(transform.position) + _ModelPosition;
+                    ClimbAnimationPosition += _ModelPosition;
+                    transform.position = ClimbAnimationPosition + _LedgePlatformPosition;
                 }
-                else
+                else // Standing Animation
                 {
-                    transform.position = Vector3.MoveTowards(MovingPlatformOffset(transform.position), MovingPlatformOffset(LedgeStandUpPosition), Time.fixedDeltaTime * 4.535f);
-                    if (transform.position == MovingPlatformOffset(LedgeStandUpPosition))
+                    LedgeGrabAnimationSpeedInc += Time.fixedDeltaTime * 0.605f;
+                    ClimbAnimationPosition = Vector3.MoveTowards(ClimbAnimationPosition, LedgeStandUpPosition, LedgeGrabAnimationSpeedInc);
+                    transform.position = ClimbAnimationPosition + _LedgePlatformPosition;
+                    if (Mathf.Approximately(ClimbAnimationPosition.y, LedgeStandUpPosition.y))
                     {
                         LedgePlatformPosition = null;
                         _AllowMoveHorizontal = true;
@@ -247,7 +263,9 @@ public class Player_Controller : MonoBehaviour
             }
             else
             {
-                transform.position = Vector3.MoveTowards(MovingPlatformOffset(transform.position), MovingPlatformOffset(ArmsReachPosition), Time.fixedDeltaTime * GrabSpeed);
+                if(_ArmsReach != ArmsReachPosition) LedgeGrabAnimationSpeedInc += Time.fixedDeltaTime * GrabSpeed;
+                _ArmsReach = Vector3.MoveTowards(ArmsReachPosition,Vector3.zero , LedgeGrabAnimationSpeedInc);
+                transform.position = _LedgePlatformPosition - _ArmsReach;
             }
         }
     }
@@ -260,19 +278,12 @@ public class Player_Controller : MonoBehaviour
             MoveVertical = Vector3.zero;
         }
     }
-
-    private Vector3 MovingPlatformOffset(Vector3 movingOffsetPosition)
-    {
-         Vector3 _movingOffsetPosition = movingOffsetPosition;
-        _movingOffsetPosition.z += _LedgePlatformPosition.z;
-        return _movingOffsetPosition;
-    }
     public void ClimbSequence()
     {
-
+        LedgeGrabAnimationSpeedInc = 0;
         SuperLanding = false;
-        LedgeStandUpPosition = transform.position;
-        LedgeStandUpPosition.y += (3-0.369f);
+        LedgeStandUpPosition = ClimbAnimationPosition;
+        LedgeStandUpPosition.y += (3-0.6762f);
         OnLedge = true;
         TriggerAnim.ClimbLedge(false);
         TriggerAnim.LedgeGrab(false);

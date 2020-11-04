@@ -23,6 +23,7 @@ public class MovingPlat_Point_AnB : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (Speed > 50) Speed = 50f;
         if (_PointA)
         {
             if(GoToPosition != PointA.position)GoToPosition = PointA.position;

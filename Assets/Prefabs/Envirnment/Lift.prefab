@@ -1127,8 +1127,10 @@ GameObject:
   - component: {fileID: 6523304423534776957}
   - component: {fileID: 701408862343638660}
   - component: {fileID: 1263032819599252007}
+  - component: {fileID: 584041904}
+  - component: {fileID: 584041903}
   m_Layer: 0
-  m_Name: Scifi_Floors_02 (1)
+  m_Name: BoxCollider_Trigger_Platform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1209,6 +1211,31 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1560608302202514212, guid: 412bda283c50047c09ecf6f6940eabdb, type: 3}
+--- !u!65 &584041904
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1263032819599252056}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 3.18, y: 2, z: 8.73}
+  m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &584041903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1263032819599252056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a058545fd826deb4da0bebb534bd1b99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1453074185880372765
 GameObject:
   m_ObjectHideFlags: 0
