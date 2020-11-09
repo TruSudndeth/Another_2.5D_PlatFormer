@@ -6,7 +6,7 @@ using UnityEngine;
 public class Player_Controller : MonoBehaviour
 {
     //ToDo's
-    // Must fix StandUp complete animation gives player back controlls
+    // Landing ON Moving Platform cuts threw platform
     // Must Fix LedgePlatformPosition to update player transform to where the ledge is !IMPORTANT!
     // Fix Player Ledge LetGo Falls (Animation Scrip)
     // On landing choose to roll forwards
@@ -23,9 +23,12 @@ public class Player_Controller : MonoBehaviour
     private float GrabSpeed;
     [SerializeField]
     private Vector3 LedgeStandUpPosition;
+    [SerializeField]
     private bool Climbing = false;
+    [SerializeField]
     private bool OnLedge = false;
     private Player_LedgeGrab LedgeDetection_Offset;
+    [SerializeField]
     private bool IsOnLedge = false;
     [SerializeField]
     private Vector3 ArmsReachPosition;
@@ -47,6 +50,7 @@ public class Player_Controller : MonoBehaviour
     private Vector3 MoveVertical = Vector3.zero;
     [HideInInspector]
     public bool Jumped = false;
+    [SerializeField]
     private bool Jumped_FixedUpdate = false;
     private bool SuperLanding = false;
     private IEnumerator _Climbed;
@@ -65,6 +69,18 @@ public class Player_Controller : MonoBehaviour
     private Vector3 TestingFloat;
     private float LedgeGrabAnimationSpeedInc;
     private Vector3 ClimbAnimationPosition;
+    [SerializeField]
+    private bool ClimbingLadders = false;
+    [SerializeField]
+    private float MySpeedFloat;
+    [SerializeField]
+    private bool StepOverAnim = false;
+    [SerializeField]
+    private bool LadderHandsOffSet = false;
+    private Vector3 IKModelTransformOffset;
+    private Vector3 IKModelTransformOffset_Var;
+    private bool _IKModelTransformOffset = false;
+    private bool _IKModelExitAnim = false;
 
     // Start is called before the first frame update
     void Start()
@@ -79,6 +95,20 @@ public class Player_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.C) && LedgePlatformPosition.tag == "LatterStep")
+        {
+            IKModelTransformOffset = Vector3.zero;
+            IKModelTransformOffset_Var = Vector3.zero;
+            LedgeGrabAnimationSpeedInc = 0;
+            ClimbingLadders = !ClimbingLadders;
+            TriggerAnim.LadderClimb(ClimbingLadders);
+            if (ClimbingLadders)
+            {
+                LadderHandsOffSet = false;
+                ClimbingLadders = true;
+                _AllowMoveHorizontal = false;
+            }
+        }
         if (LedgePlatformPosition && LedgePlatformPosition.tag == "MovingPlatform")
         {
             Vector3 _LedgeOffset = _GrabableLedge.ReverseLedgeGrab(InverseDirection);
@@ -87,7 +117,7 @@ public class Player_Controller : MonoBehaviour
             _LedgePlatformPosition = _LedgeOffset + (transform.position - _LedgeDetection_Offset);
             _LedgePlatformPosition.x = 0;
         }
-        if(Input.GetAxisRaw("Vertical") < 0 && IsOnLedge)
+        if(Input.GetKeyDown(KeyCode.X) && IsOnLedge)
         {
             ResetAllControls();
         }
@@ -188,6 +218,73 @@ public class Player_Controller : MonoBehaviour
         Vector3 HorizontalAnimation = new Vector3(0, 0 , Input.GetAxis("Horizontal"));
         if (!IsOnLedge)TriggerAnim.CharacterAnimations((MoveVertical + HorizontalAnimation * InverseDirection));
         ClifHanger();
+        ClimbLadderAnimation();
+    }
+
+    public void StepOverLadder(bool _state)
+    {
+        StepOverAnim = _state;
+        if (StepOverAnim)
+        {
+            IKModelTransformOffset = Vector3.zero;
+            IKModelTransformOffset_Var = Vector3.zero;
+            ClimbingLadders = false;
+            TriggerAnim.LadderClimb(false);
+        }
+    }
+    public void IKModelTransformOffsetBool()
+    {
+        _IKModelExitAnim = true;
+    }
+
+    public void ClimbLadderAnimation()
+    {
+        if (ClimbingLadders)
+        {
+            ClimbAnimationPosition += ModelToControllerTransformOffset(new Vector3(0, 2.20178f, -0.6133f), MySpeedFloat);
+            transform.position = ClimbAnimationPosition + _LedgePlatformPosition;
+            if (_IKModelTransformOffset) _IKModelTransformOffset = false;
+        }
+        if (StepOverAnim)
+        {
+            ClimbAnimationPosition += ModelToControllerTransformOffset(Vector3.zero, 0);
+            transform.position = ClimbAnimationPosition + _LedgePlatformPosition;
+            if(_IKModelExitAnim)
+            {
+                _IKModelExitAnim = false;
+                SuperLanding = false;
+                _IKModelTransformOffset = false;
+                StepOverAnim = false;
+                _AllowMoveHorizontal = true;
+                IsOnLedge = false;
+            }
+        }
+    }
+    private Vector3 ModelToControllerTransformOffset(Vector3 _ControllerAnimationOffset, float _Speed)
+    {
+        Vector3 _IKModelPosition = ScaleModelOffset(TriggerAnim.ModelPosition);
+
+        IKModelTransformOffset_Var = Vector3.MoveTowards(Vector3.zero, _ControllerAnimationOffset, LedgeGrabAnimationSpeedInc);
+        Vector3 IKModelInc = IKModelTransformOffset_Var - IKModelTransformOffset;
+        IKModelTransformOffset = IKModelTransformOffset_Var;
+        if (IKModelTransformOffset_Var != _ControllerAnimationOffset)
+        {
+            LedgeGrabAnimationSpeedInc += Time.deltaTime * _Speed;
+        }
+        if(IKModelTransformOffset_Var == _ControllerAnimationOffset)
+        {
+            _IKModelTransformOffset = true;
+        }
+        IKModelInc.z *= InverseDirection;
+        _IKModelPosition.z *= InverseDirection;
+        return IKModelInc + _IKModelPosition;
+    }
+    private Vector3 ScaleModelOffset(Vector3 _Scaled)
+    {
+        _Scaled.x *= transform.localScale.x;
+        _Scaled.y *= transform.localScale.y;
+        _Scaled.z *= transform.localScale.z;
+        return _Scaled;
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -198,6 +295,9 @@ public class Player_Controller : MonoBehaviour
             _GrabableLedge = hit.gameObject.GetComponent<LedgeGrab>();
             if(_GrabableLedge != null)
             {
+                IKModelTransformOffset = Vector3.zero;
+                IKModelTransformOffset_Var = Vector3.zero;
+                LadderHandsOffSet = false;
                 ClimbAnimationPosition = new Vector3();
                 LedgePlatformPosition = hit.gameObject.transform;
                 IsOnLedge = true;
@@ -223,15 +323,15 @@ public class Player_Controller : MonoBehaviour
     private void CalculateAnimationGrabSpeed()
     {
         GrabSpeed = Vector3.Distance(LedgeDetection_Offset.transform.position, transform.position + ArmsReachPosition);
-        float DistanceDelta = Mathf.Clamp((GrabSpeed - 7.52f) / 4.11763f, 0, 1);
-        GrabSpeed *= Mathf.Lerp(0.4916f, 1.93f, DistanceDelta);
+        float DistanceDelta = Mathf.Clamp((GrabSpeed - 4) / 5, 0, 1);
+        GrabSpeed *= Mathf.Lerp(0.92235f, 2.667f, DistanceDelta);
     }
 
     private void ClifHanger()
     {
         if (IsOnLedge)
         {
-            if (Jumped)
+            if (Jumped && LedgePlatformPosition.tag != "LatterStep")
             {
                 Jumped = false;
                 Climbing = true;
@@ -241,19 +341,19 @@ public class Player_Controller : MonoBehaviour
             {
                 if (!OnLedge)  //Climbing Animation
                 {
-                    Vector3 _ModelPosition = TriggerAnim.ModelPosition;
-                    _ModelPosition.z *= InverseDirection;
-                    ClimbAnimationPosition += _ModelPosition;
+                    ClimbAnimationPosition += ModelToControllerTransformOffset(Vector3.zero, 0);
                     transform.position = ClimbAnimationPosition + _LedgePlatformPosition;
+                    if (_IKModelTransformOffset) _IKModelTransformOffset = false;
                 }
                 else // Standing Animation
                 {
-                    LedgeGrabAnimationSpeedInc += Time.fixedDeltaTime * 0.605f;
-                    ClimbAnimationPosition = Vector3.MoveTowards(ClimbAnimationPosition, LedgeStandUpPosition, LedgeGrabAnimationSpeedInc);
+                    ClimbAnimationPosition += ModelToControllerTransformOffset(new Vector3(0, 1.668f, 0), 2.84f);
                     transform.position = ClimbAnimationPosition + _LedgePlatformPosition;
-                    if (Mathf.Approximately(ClimbAnimationPosition.y, LedgeStandUpPosition.y))
+
+                    if (_IKModelTransformOffset)
                     {
                         LedgePlatformPosition = null;
+                        _IKModelTransformOffset = false;
                         _AllowMoveHorizontal = true;
                         OnLedge = false;
                         Climbing = false;
@@ -261,10 +361,13 @@ public class Player_Controller : MonoBehaviour
                     }
                 }
             }
-            else
+            else if(!ClimbingLadders && !Climbing)
             {
-                if(_ArmsReach != ArmsReachPosition) LedgeGrabAnimationSpeedInc += Time.fixedDeltaTime * GrabSpeed;
-                _ArmsReach = Vector3.MoveTowards(ArmsReachPosition,Vector3.zero , LedgeGrabAnimationSpeedInc);
+                if (_ArmsReach != ArmsReachPosition)
+                {
+                    LedgeGrabAnimationSpeedInc += Time.fixedDeltaTime * GrabSpeed;
+                    _ArmsReach = Vector3.MoveTowards(ArmsReachPosition, Vector3.zero, LedgeGrabAnimationSpeedInc);
+                }
                 transform.position = _LedgePlatformPosition - _ArmsReach;
             }
         }
@@ -283,7 +386,6 @@ public class Player_Controller : MonoBehaviour
         LedgeGrabAnimationSpeedInc = 0;
         SuperLanding = false;
         LedgeStandUpPosition = ClimbAnimationPosition;
-        LedgeStandUpPosition.y += (3-0.6762f);
         OnLedge = true;
         TriggerAnim.ClimbLedge(false);
         TriggerAnim.LedgeGrab(false);

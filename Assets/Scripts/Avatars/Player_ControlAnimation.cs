@@ -10,8 +10,23 @@ public class Player_ControlAnimation : MonoBehaviour
     [SerializeField]
     private Player_Controller PlayerController;
     [SerializeField]
-    public Vector3 ModelPosition;
-    private bool Climb = false;
+    private Vector3 _ModelPosition;
+    private Vector3 ModelStartPosition;
+
+    private void Awake()
+    {
+        ModelStartPosition = transform.localPosition;
+    }
+    public Vector3 ModelPosition
+    {
+        get
+        {
+            _ModelPosition = transform.localPosition - ModelStartPosition;
+            _ModelPosition.x = 0;
+            transform.localPosition = ModelStartPosition;
+            return _ModelPosition;
+        }
+    }
     [SerializeField]
     private float LandingPower = 0;
     private bool reverseBool = false;
@@ -36,13 +51,6 @@ public class Player_ControlAnimation : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if(Climb)
-        {
-            ModelPosition = transform.localPosition * 3;
-            ModelPosition.x = 0;
-            transform.localPosition = Vector3.zero;
-        }
-
         if (Jump)
         {
             IsGrounded = false;
@@ -130,7 +138,11 @@ public class Player_ControlAnimation : MonoBehaviour
 
     public void ClimbLedge(bool _IsState)
     {
-        Climb = _IsState;
         Anim.SetBool("Climb", _IsState);
+    }
+
+    public void LadderClimb(bool _Climb)
+    {
+        Anim.SetBool("Climbing_Ladder", _Climb);
     }
 } 
