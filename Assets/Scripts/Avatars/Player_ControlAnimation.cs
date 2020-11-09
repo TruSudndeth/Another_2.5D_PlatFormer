@@ -51,7 +51,7 @@ public class Player_ControlAnimation : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (Jump)
+        if (Jump) // Sets Blend tree to Falling Idel when not grounded
         {
             IsGrounded = false;
             _fallingInc -= Time.fixedDeltaTime * 3;
@@ -63,7 +63,7 @@ public class Player_ControlAnimation : MonoBehaviour
             if(!PlayLandAnimation)Anim.SetFloat("Vertical", _fallingInc);
         }
 
-        if(PlayLandAnimation)
+        if(PlayLandAnimation) // this plays jump animation Forwards then Back to standing Idel based off fall hight
         {
             if (!reverseBool)
             {
@@ -107,7 +107,7 @@ public class Player_ControlAnimation : MonoBehaviour
     {
         Jump = true;
     }
-    public void CharactorAnimaition_Landing(float SoftLanding)
+    public void CharactorAnimaition_Landing(float SoftLanding)  // this plays jump animation landing force at diffrent hights
     {
         LandingPower = SoftLanding;
         if (LandingPower > 1 || LandingPower > 0.5f) LandingPower = 1;

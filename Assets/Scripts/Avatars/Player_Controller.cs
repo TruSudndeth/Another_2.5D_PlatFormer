@@ -23,18 +23,16 @@ public class Player_Controller : MonoBehaviour
     private float GrabSpeed;
     [SerializeField]
     private Vector3 LedgeStandUpPosition;
-    [SerializeField]
     private bool Climbing = false;
-    [SerializeField]
     private bool OnLedge = false;
     private Player_LedgeGrab LedgeDetection_Offset;
-    [SerializeField]
     private bool IsOnLedge = false;
     [SerializeField]
     private Vector3 ArmsReachPosition;
     private LedgeGrab _GrabableLedge;
     private Vector3 PlayerRotation;
     private int InverseDirection = 1;
+    [SerializeField]
     private float LandingDamage = 0;
     private Player_ControlAnimation TriggerAnim;
     private CharacterController PlayerController;
@@ -48,9 +46,7 @@ public class Player_Controller : MonoBehaviour
     private float HangeTime = 0.05f;
     private Vector3 MoveHorizontal = Vector3.zero;
     private Vector3 MoveVertical = Vector3.zero;
-    [HideInInspector]
     public bool Jumped = false;
-    [SerializeField]
     private bool Jumped_FixedUpdate = false;
     private bool SuperLanding = false;
     private IEnumerator _Climbed;
@@ -59,7 +55,6 @@ public class Player_Controller : MonoBehaviour
     private bool LandPosition = false;
     private float PlayerPlatformOffset = 0;
     private bool ZeroGravityOnLanding_thisFrame = false;
-    [SerializeField]
     private bool _AllowMoveHorizontal = true;
     [SerializeField]
     private Vector3 _LedgePlatformPosition;
@@ -69,11 +64,8 @@ public class Player_Controller : MonoBehaviour
     private Vector3 TestingFloat;
     private float LedgeGrabAnimationSpeedInc;
     private Vector3 ClimbAnimationPosition;
-    [SerializeField]
     private bool ClimbingLadders = false;
-    [SerializeField]
     private float MySpeedFloat;
-    [SerializeField]
     private bool StepOverAnim = false;
     [SerializeField]
     private bool LadderHandsOffSet = false;
@@ -182,10 +174,10 @@ public class Player_Controller : MonoBehaviour
             }
             if(SuperLanding)
             {
-                _AllowMoveHorizontal = false;
                 ZeroGravityOnLanding_thisFrame = true;
                 LandingDamage = Mathf.Abs(MoveVertical.y / 300);
                 SuperLanding = false;
+                if(LandingDamage > 0.1)_AllowMoveHorizontal = false;
                 TriggerAnim.CharactorAnimaition_Landing(LandingDamage);
                 LandingDamage = 0;
                 MoveVertical = Vector3.zero;
@@ -198,7 +190,7 @@ public class Player_Controller : MonoBehaviour
                 Grounded = false;
                 GravityT = true;
                 SuperLanding = true;
-                TriggerAnim.CharactorAnimations_Jump();
+                TriggerAnim.CharactorAnimations_Jump(); // Jump Animation is already intigrated here
                 Jumped_FixedUpdate = true;
                 Jumped = false;
                 MoveVertical.y = 0;
@@ -271,7 +263,7 @@ public class Player_Controller : MonoBehaviour
     {
         if (ClimbingLadders)
         {
-            ClimbAnimationPosition += ModelToControllerTransformOffset(new Vector3(0, 2.20178f, -0.6133f), MySpeedFloat);
+            ClimbAnimationPosition += ModelToControllerTransformOffset(new Vector3(0, 2.20178f, -0.6133f), 10);
             transform.position = ClimbAnimationPosition + _LedgePlatformPosition;
             if (_IKModelTransformOffset) _IKModelTransformOffset = false;
         }
