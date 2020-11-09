@@ -230,6 +230,7 @@ public class Player_Controller : MonoBehaviour
             PlayerRoll();
             if (_IKModelExitAnim)
             {
+                ClimbAnimationPosition = Vector3.zero;
                 _AllowMoveHorizontal = true;
                 _IKModelExitAnim = false;
                 PlayerRoll_Fixed = false;
@@ -239,9 +240,17 @@ public class Player_Controller : MonoBehaviour
 
     private void PlayerRoll()
     {
-            ClimbAnimationPosition = ModelToControllerTransformOffset(Vector3.zero, 1);
-            PlayerController.Move(_MovingPlatform + ClimbAnimationPosition + (MoveVertical * Time.fixedDeltaTime));// needs  + _LedgePlatformPosition to roll on moving platform
-            if (_IKModelTransformOffset) _IKModelTransformOffset = false;
+        if(Jumped_FixedUpdate)
+        {
+            TriggerAnim.CharactorAnimations_Jump();
+            _AllowMoveHorizontal = true;
+            _IKModelExitAnim = true;
+        }
+        float ControllRoll = Mathf.Abs(Input.GetAxis("Horizontal"));
+        if (ControllRoll == 0) ControllRoll = 0.25f;
+        ClimbAnimationPosition = (ModelToControllerTransformOffset(Vector3.zero, 1) * 2.333f) * ControllRoll;
+        PlayerController.Move(_MovingPlatform + ClimbAnimationPosition + (MoveVertical * Time.fixedDeltaTime));// needs  + _LedgePlatformPosition to roll on moving platform
+        if (_IKModelTransformOffset) _IKModelTransformOffset = false;
     }
     public void StepOverLadder(bool _state)
     {

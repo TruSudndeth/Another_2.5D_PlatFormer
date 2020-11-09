@@ -19,7 +19,8 @@ public class RollBehaviour : StateMachineBehaviour
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.SetBool("Roll", false);
+        if(animator.GetBool("Roll"))animator.SetBool("Roll", false);
+        if (animator.GetBool("Jump"))animator.SetBool("Jump", false);
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()

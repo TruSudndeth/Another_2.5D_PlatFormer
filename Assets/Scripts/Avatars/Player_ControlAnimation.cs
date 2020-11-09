@@ -105,6 +105,7 @@ public class Player_ControlAnimation : MonoBehaviour
     }
     public void CharactorAnimations_Jump()
     {
+        Anim.SetBool("Jump", true);
         Jump = true;
     }
     public void CharactorAnimaition_Landing(float SoftLanding)  // this plays jump animation landing force at diffrent hights
