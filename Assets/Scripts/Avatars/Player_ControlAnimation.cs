@@ -145,4 +145,8 @@ public class Player_ControlAnimation : MonoBehaviour
     {
         Anim.SetBool("Climbing_Ladder", _Climb);
     }
+    public void PlayerRolls(bool _isState)
+    {
+        Anim.SetBool("Roll", _isState);
+    }
 } 

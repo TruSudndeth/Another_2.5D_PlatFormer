@@ -81,6 +81,8 @@ public class Player_Controller : MonoBehaviour
     private Vector3 IKModelTransformOffset_Var;
     private bool _IKModelTransformOffset = false;
     private bool _IKModelExitAnim = false;
+    private bool _PlayerRoll = false;
+    private bool PlayerRoll_Fixed = false;
 
     // Start is called before the first frame update
     void Start()
@@ -95,6 +97,10 @@ public class Player_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.LeftShift) && !PlayerRoll_Fixed)
+        {
+            _PlayerRoll = true;
+        }
         if(Input.GetKeyDown(KeyCode.C) && LedgePlatformPosition.tag == "LatterStep")
         {
             IKModelTransformOffset = Vector3.zero;
@@ -166,6 +172,14 @@ public class Player_Controller : MonoBehaviour
     {
         if(PlayerController.isGrounded || Grounded)
         {
+            if(_PlayerRoll && !PlayerRoll_Fixed && !SuperLanding)
+            {
+                _AllowMoveHorizontal = false;
+                _PlayerRoll = false;
+                PlayerRoll_Fixed = true;
+                ClimbAnimationPosition = Vector3.zero;
+                TriggerAnim.PlayerRolls(true);
+            }
             if(SuperLanding)
             {
                 _AllowMoveHorizontal = false;
@@ -219,8 +233,24 @@ public class Player_Controller : MonoBehaviour
         if (!IsOnLedge)TriggerAnim.CharacterAnimations((MoveVertical + HorizontalAnimation * InverseDirection));
         ClifHanger();
         ClimbLadderAnimation();
+        if (PlayerRoll_Fixed)
+        {
+            PlayerRoll();
+            if (_IKModelExitAnim)
+            {
+                _AllowMoveHorizontal = true;
+                _IKModelExitAnim = false;
+                PlayerRoll_Fixed = false;
+            }
+        }
     }
 
+    private void PlayerRoll()
+    {
+            ClimbAnimationPosition = ModelToControllerTransformOffset(Vector3.zero, 1);
+            PlayerController.Move(_MovingPlatform + ClimbAnimationPosition + (MoveVertical * Time.fixedDeltaTime));// needs  + _LedgePlatformPosition to roll on moving platform
+            if (_IKModelTransformOffset) _IKModelTransformOffset = false;
+    }
     public void StepOverLadder(bool _state)
     {
         StepOverAnim = _state;

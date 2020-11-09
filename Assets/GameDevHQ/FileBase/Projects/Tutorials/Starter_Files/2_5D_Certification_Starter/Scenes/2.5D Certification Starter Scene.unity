@@ -2973,11 +2973,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: PolyGon_Coin (3)
       objectReference: {fileID: 0}
-    - target: {fileID: 6485375446821025680, guid: 6feb5a3aece36034c98ef70c15d4e80b,
-        type: 3}
-      propertyPath: m_IsTrigger
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6feb5a3aece36034c98ef70c15d4e80b, type: 3}
 --- !u!4 &1076526073 stripped
@@ -5611,7 +5606,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2120877326}
   m_LocalRotation: {x: 0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 57.3, y: 77.6, z: 152.9}
+  m_LocalPosition: {x: 57.3, y: 75, z: 207}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -5894,12 +5889,12 @@ PrefabInstance:
     - target: {fileID: 4765306228910122882, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 69.8
+      value: 5.1
       objectReference: {fileID: 0}
     - target: {fileID: 4765306228910122882, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 202.7
+      value: 211.1
       objectReference: {fileID: 0}
     - target: {fileID: 4765306228910122882, guid: 4bdaa12fa5f25b04ca81447ee515b93b,
         type: 3}
@@ -6214,7 +6209,7 @@ PrefabInstance:
     - target: {fileID: 7191924167884057413, guid: 1cddbf19760e7c74fb10ab37fde52089,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 29.599998
+      value: 6.199997
       objectReference: {fileID: 0}
     - target: {fileID: 7191924167884057413, guid: 1cddbf19760e7c74fb10ab37fde52089,
         type: 3}
