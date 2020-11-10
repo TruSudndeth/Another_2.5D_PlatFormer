@@ -18,6 +18,7 @@ public class LatterToTop : StateMachineBehaviour
     {
         if(stateInfo.normalizedTime >= TriggerExitTime && !_ExitOneShot)
         {
+            Debug.Log("TriggerExitTime animator Behaviour works");
             _ExitOneShot = true;
             Player_Controller PlayerController = animator.transform.parent.gameObject.GetComponent<Player_Controller>();
             if (PlayerController) PlayerController.IKModelTransformOffsetBool();

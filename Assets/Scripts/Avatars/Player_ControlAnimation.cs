@@ -103,10 +103,10 @@ public class Player_ControlAnimation : MonoBehaviour
         Anim.SetFloat("Speed", SpeedMultiplyer);
         Anim.SetFloat("Horizontal", _PlayerInput.z);
     }
-    public void CharactorAnimations_Jump()
+    public void CharactorAnimations_Jump(bool _IsState)
     {
-        Anim.SetBool("Jump", true);
-        Jump = true;
+        Anim.SetBool("Jump", _IsState);
+        Jump = _IsState;
     }
     public void CharactorAnimaition_Landing(float SoftLanding)  // this plays jump animation landing force at diffrent hights
     {

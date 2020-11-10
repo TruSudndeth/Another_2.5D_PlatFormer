@@ -67,8 +67,6 @@ public class Player_Controller : MonoBehaviour
     private bool ClimbingLadders = false;
     private float MySpeedFloat;
     private bool StepOverAnim = false;
-    [SerializeField]
-    private bool LadderHandsOffSet = false;
     private Vector3 IKModelTransformOffset;
     private Vector3 IKModelTransformOffset_Var;
     private bool _IKModelTransformOffset = false;
@@ -102,7 +100,6 @@ public class Player_Controller : MonoBehaviour
             TriggerAnim.LadderClimb(ClimbingLadders);
             if (ClimbingLadders)
             {
-                LadderHandsOffSet = false;
                 ClimbingLadders = true;
                 _AllowMoveHorizontal = false;
             }
@@ -169,7 +166,6 @@ public class Player_Controller : MonoBehaviour
                 _AllowMoveHorizontal = false;
                 _PlayerRoll = false;
                 PlayerRoll_Fixed = true;
-                ClimbAnimationPosition = Vector3.zero;
                 TriggerAnim.PlayerRolls(true);
             }
             if(SuperLanding)
@@ -185,12 +181,13 @@ public class Player_Controller : MonoBehaviour
             if(Jumped_FixedUpdate)Jumped_FixedUpdate = false;
             if(Jumped && !Jumped_FixedUpdate && !IsOnLedge)
             {
+                _IKModelExitAnim = true;
                 LandPosition = false;
                 MovingPlatform = null;
                 Grounded = false;
                 GravityT = true;
                 SuperLanding = true;
-                TriggerAnim.CharactorAnimations_Jump(); // Jump Animation is already intigrated here
+                TriggerAnim.CharactorAnimations_Jump(true); // Jump Animation is already intigrated here
                 Jumped_FixedUpdate = true;
                 Jumped = false;
                 MoveVertical.y = 0;
@@ -230,7 +227,8 @@ public class Player_Controller : MonoBehaviour
             PlayerRoll();
             if (_IKModelExitAnim)
             {
-                ClimbAnimationPosition = Vector3.zero;
+                TriggerAnim.CharactorAnimations_Jump(false);
+                TriggerAnim.PlayerRolls(false);
                 _AllowMoveHorizontal = true;
                 _IKModelExitAnim = false;
                 PlayerRoll_Fixed = false;
@@ -240,17 +238,14 @@ public class Player_Controller : MonoBehaviour
 
     private void PlayerRoll()
     {
-        if(Jumped_FixedUpdate)
-        {
-            TriggerAnim.CharactorAnimations_Jump();
-            _AllowMoveHorizontal = true;
-            _IKModelExitAnim = true;
-        }
         float ControllRoll = Mathf.Abs(Input.GetAxis("Horizontal"));
         if (ControllRoll == 0) ControllRoll = 0.25f;
         ClimbAnimationPosition = (ModelToControllerTransformOffset(Vector3.zero, 1) * 2.333f) * ControllRoll;
         PlayerController.Move(_MovingPlatform + ClimbAnimationPosition + (MoveVertical * Time.fixedDeltaTime));// needs  + _LedgePlatformPosition to roll on moving platform
-        if (_IKModelTransformOffset) _IKModelTransformOffset = false;
+        if (_IKModelTransformOffset)
+        {
+            _IKModelTransformOffset = false;
+        }
     }
     public void StepOverLadder(bool _state)
     {
@@ -328,7 +323,6 @@ public class Player_Controller : MonoBehaviour
             {
                 IKModelTransformOffset = Vector3.zero;
                 IKModelTransformOffset_Var = Vector3.zero;
-                LadderHandsOffSet = false;
                 ClimbAnimationPosition = new Vector3();
                 LedgePlatformPosition = hit.gameObject.transform;
                 IsOnLedge = true;
