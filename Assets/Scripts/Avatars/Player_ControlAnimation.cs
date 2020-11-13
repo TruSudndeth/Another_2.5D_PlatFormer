@@ -12,6 +12,21 @@ public class Player_ControlAnimation : MonoBehaviour
     [SerializeField]
     private Vector3 _ModelPosition;
     private Vector3 ModelStartPosition;
+    [SerializeField]
+    private float LandingPower = 0;
+    private bool reverseBool = false;
+    private bool PlayLandAnimation;
+    private float ClipLandingAnim = 0;
+    private AnimationClip Landing;
+    private Animator Anim;
+    private AnimationClip Idle;
+    private float SpeedMultiplyer = 1;
+    private bool Jump = false;
+    private bool IsGrounded = true;
+    private IEnumerator _FallingInc;
+    private float _fallingInc = 0;
+    private IEnumerator _AnimHoldTimeDelay;
+    private bool PlayerRollsOnLanding = false;
 
     private void Awake()
     {
@@ -27,23 +42,11 @@ public class Player_ControlAnimation : MonoBehaviour
             return _ModelPosition;
         }
     }
-    [SerializeField]
-    private float LandingPower = 0;
-    private bool reverseBool = false;
-    private bool PlayLandAnimation;
-    private float ClipLandingAnim = 0;
-    private AnimationClip Landing;
-    private Animator Anim;
-    private float SpeedMultiplyer = 1;
-    private bool Jump = false;
-    private bool IsGrounded = true;
-    private IEnumerator _FallingInc;
-    private float _fallingInc = 0;
-    private IEnumerator _AnimHoldTimeDelay;
     void Start()
     {
         Anim = GetComponent<Animator>();
-        Landing = AnimatorClips();
+        Landing = AnimatorClips("Landing");
+        Idle = AnimatorClips("Idle");
         if (Landing == null)
         {
             Debug.Log("There is no Clip name Landing");
@@ -70,16 +73,17 @@ public class Player_ControlAnimation : MonoBehaviour
                 ClipLandingAnim += Time.deltaTime;
                 if(ClipLandingAnim >= LandingPower)reverseBool = true;
             }
-            if(reverseBool)
+            if(PlayerRollsOnLanding || reverseBool)
             {
                 ClipLandingAnim -= Time.deltaTime;
-                if (ClipLandingAnim <= 0)
+                if (PlayerRollsOnLanding || ClipLandingAnim <= 0)
                 {
                     PlayerController.AllowMoveHorizontal();
                     ClipLandingAnim = 0;
                     reverseBool = false;
                     PlayLandAnimation = false;
-                    Anim.SetBool("Landing", false);
+                    if(!PlayerRollsOnLanding)Anim.SetBool("Landing", false);
+                    PlayerRollsOnLanding = false;
                 }
             }
             Anim.Play(Landing.name, 0, ClipLandingAnim);
@@ -103,13 +107,24 @@ public class Player_ControlAnimation : MonoBehaviour
         Anim.SetFloat("Speed", SpeedMultiplyer);
         Anim.SetFloat("Horizontal", _PlayerInput.z);
     }
-    public void CharactorAnimations_Jump(bool _IsState)
+    public void CharactorAnimations_Jump()
     {
+        Jump = true;
+    }
+
+    public void SetBoolJump(bool _IsState)
+    {
+        if (_IsState)
+        {
+            Debug.Log("idle State Ran ");
+            Anim.Play(Idle.name, 0);
+            PlayerController.IKModelTransformOffsetBool();
+        }
         Anim.SetBool("Jump", _IsState);
-        Jump = _IsState;
     }
     public void CharactorAnimaition_Landing(float SoftLanding)  // this plays jump animation landing force at diffrent hights
     {
+        PlayerRollsOnLanding = false;
         LandingPower = SoftLanding;
         if (LandingPower > 1 || LandingPower > 0.5f) LandingPower = 1;
         IsGrounded = true;
@@ -118,12 +133,12 @@ public class Player_ControlAnimation : MonoBehaviour
         Anim.SetBool("Landing", true);
     }
 
-    private AnimationClip AnimatorClips()
+    private AnimationClip AnimatorClips(string _Name)
     {
         AnimationClip[] FindByName = Anim.runtimeAnimatorController.animationClips;
         foreach(AnimationClip AClip in FindByName)
         {
-            if(AClip.name == "Landing")
+            if(AClip.name == _Name)
             {
                 return AClip;
             }
@@ -148,6 +163,7 @@ public class Player_ControlAnimation : MonoBehaviour
     }
     public void PlayerRolls(bool _isState)
     {
+        PlayerRollsOnLanding = _isState; 
         Anim.SetBool("Roll", _isState);
     }
 } 

@@ -16,9 +16,8 @@ public class LatterToTop : StateMachineBehaviour
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if(stateInfo.normalizedTime >= TriggerExitTime && !_ExitOneShot)
+        if(stateInfo.normalizedTime >= TriggerExitTime && !_ExitOneShot || animator.GetBool("Jump"))
         {
-            Debug.Log("TriggerExitTime animator Behaviour works");
             _ExitOneShot = true;
             Player_Controller PlayerController = animator.transform.parent.gameObject.GetComponent<Player_Controller>();
             if (PlayerController) PlayerController.IKModelTransformOffsetBool();

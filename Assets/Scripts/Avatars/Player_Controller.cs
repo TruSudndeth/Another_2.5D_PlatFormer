@@ -6,6 +6,7 @@ using UnityEngine;
 public class Player_Controller : MonoBehaviour
 {
     //ToDo's
+    // needs  + _LedgePlatformPosition to roll on moving platform line 263
     // Landing ON Moving Platform cuts threw platform
     // Must Fix LedgePlatformPosition to update player transform to where the ledge is !IMPORTANT!
     // Fix Player Ledge LetGo Falls (Animation Scrip)
@@ -73,6 +74,8 @@ public class Player_Controller : MonoBehaviour
     private bool _IKModelExitAnim = false;
     private bool _PlayerRoll = false;
     private bool PlayerRoll_Fixed = false;
+    private bool NextFrame = false;
+    private int NextFrameCount = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -87,10 +90,11 @@ public class Player_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.LeftShift) && !PlayerRoll_Fixed)
+        if(Input.GetKey(KeyCode.LeftShift) && !PlayerRoll_Fixed && !_PlayerRoll && PlayerController.isGrounded)
         {
             _PlayerRoll = true;
         }
+        if((Input.GetKeyDown(KeyCode.Space)) && !Jumped && !Jumped_FixedUpdate) Jumped = true;
         if(Input.GetKeyDown(KeyCode.C) && LedgePlatformPosition.tag == "LatterStep")
         {
             IKModelTransformOffset = Vector3.zero;
@@ -140,28 +144,32 @@ public class Player_Controller : MonoBehaviour
             _MovingPlatform = MovingPlatform.position - new Vector3(transform.position.x, transform.position.y + OffSet_Y, transform.position.z + PlayerPlatformOffset);
             if (MovingPlatform.tag == "MovingPlatform") _MovingPlatform.y -= 2.31f;
         }
-        if((Input.GetKeyDown(KeyCode.Space)) && !Jumped && !Jumped_FixedUpdate) Jumped = true;
-        if (Input.GetAxisRaw("Horizontal") != 0 && (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) && _AllowMoveHorizontal)
+        if (Input.GetAxisRaw("Horizontal") != 0 && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift) && (_AllowMoveHorizontal || _PlayerRoll))
         {
-                if (Input.GetAxisRaw("Horizontal") > 0)
-                {
-                    PlayerRotation.y = 0;
-                    InverseDirection = 1;
-                }
-                else
-                {
-                    PlayerRotation.y = 180;
-                    InverseDirection = -1;
-                }
-            
+            if (Input.GetAxisRaw("Horizontal") > 0)
+            {
+                PlayerRotation.y = 0;
+                InverseDirection = 1;
+            }
+            else
+            {
+                PlayerRotation.y = 180;
+                InverseDirection = -1;
+            }
+            transform.rotation = Quaternion.Euler(PlayerRotation);
         }
     }
 
     private void FixedUpdate()
     {
+        if(NextFrame)
+        {
+                NextFrame = false;
+                TriggerAnim.SetBoolJump(false);
+        }
         if(PlayerController.isGrounded || Grounded)
         {
-            if(_PlayerRoll && !PlayerRoll_Fixed && !SuperLanding)
+            if(_PlayerRoll && !PlayerRoll_Fixed)
             {
                 _AllowMoveHorizontal = false;
                 _PlayerRoll = false;
@@ -178,16 +186,21 @@ public class Player_Controller : MonoBehaviour
                 LandingDamage = 0;
                 MoveVertical = Vector3.zero;
             }
-            if(Jumped_FixedUpdate)Jumped_FixedUpdate = false;
-            if(Jumped && !Jumped_FixedUpdate && !IsOnLedge)
+            if (Jumped_FixedUpdate)
             {
-                _IKModelExitAnim = true;
+                Jumped_FixedUpdate = false;
+            }
+            if(Jumped && !Jumped_FixedUpdate && !IsOnLedge && (_AllowMoveHorizontal || PlayerRoll_Fixed))
+            {
+                NextFrameCount = 0;
+                NextFrame = true;
                 LandPosition = false;
                 MovingPlatform = null;
                 Grounded = false;
                 GravityT = true;
                 SuperLanding = true;
-                TriggerAnim.CharactorAnimations_Jump(true); // Jump Animation is already intigrated here
+                TriggerAnim.CharactorAnimations_Jump(); // Jump Animation is already intigrated here
+                TriggerAnim.SetBoolJump(true);
                 Jumped_FixedUpdate = true;
                 Jumped = false;
                 MoveVertical.y = 0;
@@ -201,7 +214,7 @@ public class Player_Controller : MonoBehaviour
         }
         else
         {
-            if((Input.GetKey(KeyCode.Space)) && MoveVertical.y > JumpForce - 1 && Jumped_FixedUpdate)
+            if(Input.GetKey(KeyCode.Space) && MoveVertical.y > JumpForce - 1 && Jumped_FixedUpdate)
             {
                 gravity = HangeTime;
             }
@@ -213,9 +226,7 @@ public class Player_Controller : MonoBehaviour
         }
         if (!IsOnLedge && _AllowMoveHorizontal)
         {
-            transform.rotation = Quaternion.Euler(PlayerRotation);
-            if (Grounded) 
-                MoveVertical.y = 0;
+            if (Grounded) MoveVertical.y = 0;
             PlayerController.Move(_MovingPlatform + (MoveVertical + (MoveHorizontal * SpeedWMultiplier(MoveHorizontal.z))) * Time.fixedDeltaTime);
         }
         Vector3 HorizontalAnimation = new Vector3(0, 0 , Input.GetAxis("Horizontal"));
@@ -227,8 +238,8 @@ public class Player_Controller : MonoBehaviour
             PlayerRoll();
             if (_IKModelExitAnim)
             {
-                TriggerAnim.CharactorAnimations_Jump(false);
                 TriggerAnim.PlayerRolls(false);
+                Debug.Log("This Ran Once");
                 _AllowMoveHorizontal = true;
                 _IKModelExitAnim = false;
                 PlayerRoll_Fixed = false;
@@ -238,8 +249,9 @@ public class Player_Controller : MonoBehaviour
 
     private void PlayerRoll()
     {
-        float ControllRoll = Mathf.Abs(Input.GetAxis("Horizontal"));
-        if (ControllRoll == 0) ControllRoll = 0.25f;
+        float ControllRoll = Input.GetAxis("Horizontal");
+        if (ControllRoll * InverseDirection <= 0) ControllRoll = 0.25f;
+        else ControllRoll = Mathf.Abs(ControllRoll);
         ClimbAnimationPosition = (ModelToControllerTransformOffset(Vector3.zero, 1) * 2.333f) * ControllRoll;
         PlayerController.Move(_MovingPlatform + ClimbAnimationPosition + (MoveVertical * Time.fixedDeltaTime));// needs  + _LedgePlatformPosition to roll on moving platform
         if (_IKModelTransformOffset)
@@ -260,6 +272,8 @@ public class Player_Controller : MonoBehaviour
     }
     public void IKModelTransformOffsetBool()
     {
+        _AllowMoveHorizontal = true;
+        TriggerAnim.PlayerRolls(false);
         _IKModelExitAnim = true;
     }
 
@@ -321,6 +335,7 @@ public class Player_Controller : MonoBehaviour
             _GrabableLedge = hit.gameObject.GetComponent<LedgeGrab>();
             if(_GrabableLedge != null)
             {
+                _IKModelExitAnim = true;
                 IKModelTransformOffset = Vector3.zero;
                 IKModelTransformOffset_Var = Vector3.zero;
                 ClimbAnimationPosition = new Vector3();
