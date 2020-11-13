@@ -6,6 +6,7 @@ using UnityEngine;
 public class Player_Controller : MonoBehaviour
 {
     //ToDo's
+    // climb ladder from the back Fail
     // needs  + _LedgePlatformPosition to roll on moving platform line 263
     // Landing ON Moving Platform cuts threw platform
     // Must Fix LedgePlatformPosition to update player transform to where the ledge is !IMPORTANT!
@@ -262,18 +263,22 @@ public class Player_Controller : MonoBehaviour
     public void StepOverLadder(bool _state)
     {
         StepOverAnim = _state;
-        if (StepOverAnim)
+        if (StepOverAnim && ClimbingLadders)
         {
             IKModelTransformOffset = Vector3.zero;
             IKModelTransformOffset_Var = Vector3.zero;
+            _IKModelExitAnim = false;
             ClimbingLadders = false;
             TriggerAnim.LadderClimb(false);
         }
     }
     public void IKModelTransformOffsetBool()
     {
-        _AllowMoveHorizontal = true;
-        TriggerAnim.PlayerRolls(false);
+        if (PlayerRoll_Fixed)
+        {
+            _AllowMoveHorizontal = true;
+            TriggerAnim.PlayerRolls(false);
+        }
         _IKModelExitAnim = true;
     }
 
